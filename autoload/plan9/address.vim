@@ -6,7 +6,7 @@
 
 " s:SimpleAddress(address): compiles a simple address into viml {{{1
 function! s:SimpleAddress(address, idx)
-    " direction in compound address {{{2
+    " get our direction in the compound address {{{2
     if a:address[0] == "-" 
 	let direction = "back"
     else
@@ -28,17 +28,16 @@ function! s:SimpleAddress(address, idx)
 
 	let a_char = address[1:]
 	if direction == "forward"
-	    call extend(instructions, [
-			\"let byte = line2byte(line('.')) - 1 + getpos('.')[2] - 1 + ". a_char,
-			\'exe "go ". byte',
-			\"unlet byte" 
-		    \])
+	    " we use :go to move to the byte a_char in the buffer. 
+	    " if a:idx was 0, we start from byte 0, otherwise we need to
+	    " calculate the current byte to add to a_char.
+	    " the `line2byte(...` part is wrapped in eval because :go doesn't
+	    " allow functions in the arguments.
+	    call extend(instructions, 
+			\['exe "go ". eval("line2byte(line(\".\")) - 1 + col(\".\") - 1 + '. a_char . '")' ])
 	elseif direction == "back"
-	    call extend(instructions,  [
-			\"let byte = line2byte(line('.')) - 1 + getpos('.')[2] -  ". a_char, 
-			\'exe "go ". byte', 
-			\"unlet byte"
-		    \])
+	    call extend(instructions, 
+			\['exe "go ". eval("line2byte(line(\".\")) - 1 + col(\".\") - '. a_char . '")' ])
 	endif
 	return instructions "}}}3
     elseif address[0] == "0" " beggining of file {{{3
@@ -53,6 +52,7 @@ function! s:SimpleAddress(address, idx)
 	if direction == "forward"
 	    call extend(instructions, ["call search('". address[1:-2] . "')"])
 	else
+	    " :-/string/
 	    " this is an old idiom, documented in the sam paper [1]
 	    " [1]: http://plan9.bell-labs.com/sys/doc/sam/sam.html
 	    call extend(instructions, ["call search('" . address[1:-2] . "', 'b')"])
@@ -76,7 +76,8 @@ function! plan9#address#Compile(address)
     let l:a_data = split(a:address, ":", 1)
 
     let instructions = []
-    " the file the address references
+
+    " the file the address references {{{2
     if filereadable(l:a_data[0])
 	let l:filename = l:a_data[0]
 	if !buffer_exists(l:filename)
@@ -84,8 +85,9 @@ function! plan9#address#Compile(address)
 	else
 	    call add(instructions, "buffer " . l:filename)
 	endif
-    endif
+    endif "}}}2
 
+    " tokenize {{{2
     let l:addr_chars = split(l:a_data[1], '\zs')
     let tokens = []
     let c_token = ''
@@ -97,12 +99,13 @@ function! plan9#address#Compile(address)
 	endif
 	let c_token = c_token . i
     endfor
-    call add(tokens, c_token) "complete the list with the remainder
+    call add(tokens, c_token) "complete the list with the remainder }}}2
 
+    " compile tokens {{{2
     for token in tokens
 	let idx = index(tokens, token)
 	call extend(instructions, s:SimpleAddress(token, idx))
-    endfor
+    endfor "}}}2
 
     return instructions 
 endfunction
@@ -114,6 +117,41 @@ function! plan9#address#Do(address)
     endfor
 endfunction
 
-" Build(...): build a plan9 address from a vim location {{{1
-function! plan9#address#Build(...)
+" Build(expr, mods): build a plan9 address from a vim location {{{1
+"
+" expr can be any value line() can take as an argument
+" mods are filename modifiers, as in expand()
+function! plan9#address#Build(expr, mods)
+    let l:line = line(a:expr)
+    let l:col = col(a:expr)
+        
+    let path = expand("%".a:mods)
+
+    let address = ""
+    if l:line > 1
+	let address = line
+    endif
+    if l:col > 1
+	let address = join(filter([address, "#".l:col], 'v:val != ""'), "+")
+    endif
+
+    return join(filter([path, address], 'v:val != ""'), ":")
 endfunction
+
+" BuildFromSelection(mods): build a plan9 address from the selected text {{{1
+"
+" mods are filename modifiers, as in expand()
+function! plan9#address#BuildFromSelection(mods)
+    let path = expand("%".a:mods)
+    return join([path, "/".getreg("*")."/"], ":")
+endfunction 
+
+" Tests: {{{1    
+" address.vim:12
+" address.vim:#24
+" address.vim:35+#5
+" address.vim:/function/
+" address.vim:?plan9?
+" address.vim:-/plan9/
+" address.vim:20-/function/
+" address.vim:20+?function?
