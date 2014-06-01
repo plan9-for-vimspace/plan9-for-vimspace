@@ -1,0 +1,38 @@
+*plan9-for-vimspace*
+
+
+                            PLAN 9 FOR VIMSPACE      
+
+plan9-for-vimspace provides plan9 inspired utilities for vim. Currently, it
+only provides acme emulation, but a plumbing system and support for the editing
+language in sam are planned.
+
+- CONFIGURATION                               *plan9-for-vimspace-configutation*
+
+					  	       *g:plan9#modules#enabled*
+
+The plugin is composed of modules. What modules are enabled depends on the
+value of `g:plan9#modules#enabled`. By default, only the "acme" module is.
+
+On initialization, each module configures itself (unused configuration
+variables are simply not created). The following is a list of available
+configuration variables for each module:
+
+1) ACME
+
+- *g:plan9#acme#map_mouse*
+  Default = 1
+
+  Remap the mouse buttons as in the acme editor.
+
+- *g:plan9#acme#move_mouse*
+  Default = 0
+
+  Attempt to move the mouse on actions. (Not yet implemented)
+
+- *g:plan9#acme#map_keyboard*
+  Default = 0
+
+  Provide keyboard mappings for the acme mouse actions.
+
+

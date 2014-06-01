@@ -53,7 +53,7 @@ function! s:SimpleAddress(address, idx)
 	    call extend(instructions, ["call search('". address[1:-2] . "')"])
 	else
 	    " :-/string/
-	    " this is an old idiom, documented in the sam paper [1]
+	    " this is an old (but neat) idiom, documented in the sam paper [1]
 	    " [1]: http://plan9.bell-labs.com/sys/doc/sam/sam.html
 	    call extend(instructions, ["call search('" . address[1:-2] . "', 'b')"])
 	endif 
