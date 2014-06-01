@@ -19,36 +19,65 @@ function! acme#acme#Init()
     if g:plan9#acme#map_mouse > 0
 	nnoremap <silent> <MiddleMouse> <LeftMouse>:call acme#acme#MiddleMouse(expand('<cWORD>'))<cr>
 	vnoremap <silent> <MiddleMouse> :call acme#acme#MiddleMouse(getreg("*"))<cr>
-	nnoremap <silent> <RightMouse> <LeftMouse>:call acme#acme#RightMouse(expand('<cWORD>'))<cr>
-	vnoremap <silent> <RightMouse> :call acme#acme#RightMouse(getreg("*"))<cr>
+	nnoremap <silent> <RightMouse> <LeftMouse>:set opfunc=acme#acme#RightMouse<cr>g@
+	vnoremap <silent> <RightMouse> :<C-U>call acme#acme#RightMouse(visualmode())<cr>
     endif
 
     if g:plan9#acme#map_keyboard > 0
 	nnoremap <silent> <leader>mm :call acme#acme#MiddleMouse(expand('<cWORD>'))<cr>
 	vnoremap <silent> <leader>mm :call acme#acme#MiddleMouse(getreg("*"))<cr>
-	nnoremap <silent> <leader>mr :call acme#acme#RightMouse(expand('<cWORD>'))<cr>
-	vnoremap <silent> <leader>mr :call acme#acme#RightMouse(getreg("*"))<cr>
+	nnoremap <silent> <leader>mr :set opfunc=acme#acme#RightMouse<cr>g@
+	vnoremap <silent> <leader>mr :<C-U>call acme#acme#RightMouse(visualmode())<cr>
     endif
-endfunction
-
-" s:EscapeForBang(text): escape string for execution in bang commands {{{1
-function! s:EscapeForBang(text)
-	return substitute(a:text, "!", "\\\\!", "g")
-endfunction
-
-" s:Exec(prog): execute a program and put its output in a new buffer {{{1
-function! s:Exec(prog) 
-    botright vnew
-    exec "0read !". s:EscapeForBang(a:prog)
-    setlocal buftype=nofile
 endfunction
 
 " RightMouse(text): emulate the right mouse operation in acme {{{1
 " acme's manual calls this button 'mouse button 2'
-function! acme#acme#RightMouse(text)
-    if executable(split(a:text)[0])
-	call s:Exec(a:text)
+function! acme#acme#RightMouse(type)
+    let sel_save = &selection
+    let &selection = "inclusive"
+    let reg_save = @@
+    if a:type =~? "v"
+	execute "normal! `<".a:type."`>x"
+    else
+	execute "normal! BvEx"
     endif
+    let l:text = @@
+    if executable(split(l:text)[0])
+	normal P
+	let cmd_output = system(l:text)
+	botright vnew
+	"exec "0read !". substitute(a:prog, "!", "\\\\!", "g")
+	exe "normal i\<C-r>=cmd_output\<cr>"
+	setlocal nosmarttab
+	try
+	    exe "%s/\t//g"
+	catch
+	endtry
+	setlocal buftype=nofile
+    else
+	if l:text[0] == "<"
+	    " replace selection with output
+	    let cmd_output = system(l:text[1:])
+	    exe "normal i\<C-r>=cmd_output\<cr>"
+	elseif l:text[0] == ">"
+	    " open the output in a new buffer
+	    let cmd_output = system(l:text[1:], getreg("*"))
+	    botright vnew
+	    exe "normal i\<C-r>=cmd_output\<cr>"
+	    try
+		exe "%s/\t//g"
+	    catch
+	    endtry
+	    setlocal buftype=nofile
+	elseif l:text[0] == "|"
+	    " replace selection with output
+	    let cmd_output = system(l:text[1:], getreg("*"))
+	    exe "normal i\<C-r>=cmd_output\<cr>"
+	endif
+    endif
+    let @@ = reg_save
+    let &selection = sel_save
 endfunction
 
 " MiddleMouse(text): emulate the middle mouse operation in acme {{{1
