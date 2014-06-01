@@ -63,7 +63,7 @@ function! s:SimpleAddress(address, idx)
 	if a:idx == 0
 	    call add(instructions, "normal G$")
 	endif
-	call extend(instructions, ["call search('" . address[1:-2] . "')"])
+	call extend(instructions, ["call search('" . address[1:-2] . "', 'b')"])
 	return instructions "}}}3
     endif " }}}2
 
