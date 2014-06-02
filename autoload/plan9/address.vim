@@ -87,25 +87,27 @@ function! plan9#address#Compile(address)
 	endif
     endif "}}}2
 
-    " tokenize {{{2
-    let l:addr_chars = split(l:a_data[1], '\zs')
-    let tokens = []
-    let c_token = ''
-    for i in l:addr_chars
-	if i =~ '[+-]'
-	    call add(tokens, c_token)
-	    " call add(tokens, i)
-	    let c_token = ''
-	endif
-	let c_token = c_token . i
-    endfor
-    call add(tokens, c_token) "complete the list with the remainder }}}2
+    if len(l:a_data) > 1
+	" tokenize {{{2
+	let l:addr_chars = split(l:a_data[1], '\zs')
+	let tokens = []
+	let c_token = ''
+	for i in l:addr_chars
+	    if i =~ '[+-]'
+		call add(tokens, c_token)
+		" call add(tokens, i)
+		let c_token = ''
+	    endif
+	    let c_token = c_token . i
+	endfor
+	call add(tokens, c_token) "complete the list with the remainder }}}2
 
-    " compile tokens {{{2
-    for token in tokens
-	let idx = index(tokens, token)
-	call extend(instructions, s:SimpleAddress(token, idx))
-    endfor "}}}2
+	" compile tokens {{{2
+	for token in tokens
+	    let idx = index(tokens, token)
+	    call extend(instructions, s:SimpleAddress(token, idx))
+	endfor "}}}2
+    endif
 
     return instructions 
 endfunction
