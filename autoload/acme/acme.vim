@@ -17,23 +17,22 @@ function! acme#acme#Init()
     endif
 
     if g:plan9#acme#map_mouse > 0
-	nnoremap <silent> <MiddleMouse> <LeftMouse>:call acme#acme#MiddleMouse(expand('<cWORD>'))<cr>
-	vnoremap <silent> <MiddleMouse> :call acme#acme#MiddleMouse(getreg("*"))<cr>
-	nnoremap <silent> <RightMouse> <LeftMouse>:set opfunc=acme#acme#RightMouse<cr>g@
-	vnoremap <silent> <RightMouse> :<C-U>call acme#acme#RightMouse(visualmode())<cr>
+	nnoremap <silent> <RightMouse> <LeftMouse>:call acme#acme#RightMouse(expand('<cWORD>'))<cr>
+	vnoremap <silent> <RightMouse> :call acme#acme#RightMouse(getreg("*"))<cr>
+	nnoremap <silent> <MiddleMouse> <LeftMouse>:set opfunc=acme#acme#MiddleMouse<cr>g@
+	vnoremap <silent> <MiddleMouse> :<C-U>call acme#acme#MiddleMouse(visualmode())<cr>
     endif
 
     if g:plan9#acme#map_keyboard > 0
-	nnoremap <silent> <leader>mm :call acme#acme#MiddleMouse(expand('<cWORD>'))<cr>
-	vnoremap <silent> <leader>mm :call acme#acme#MiddleMouse(getreg("*"))<cr>
-	nnoremap <silent> <leader>mr :set opfunc=acme#acme#RightMouse<cr>g@
-	vnoremap <silent> <leader>mr :<C-U>call acme#acme#RightMouse(visualmode())<cr>
+	nnoremap <silent> <leader>mr :call acme#acme#RightMouse(expand('<cWORD>'))<cr>
+	vnoremap <silent> <leader>mr :call acme#acme#RightMouse(getreg("*"))<cr>
+	nnoremap <silent> <leader>mm :set opfunc=acme#acme#MiddleMouse<cr>g@
+	vnoremap <silent> <leader>mm :<C-U>call acme#acme#MiddleMouse(visualmode())<cr>
     endif
 endfunction
 
-" RightMouse(text): emulate the right mouse operation in acme {{{1
-" acme's manual calls this button 'mouse button 2'
-function! acme#acme#RightMouse(type)
+" MiddleMouse(text): emulate the middle mouse operation in acme {{{1
+function! acme#acme#MiddleMouse(type)
     let sel_save = &selection
     let &selection = "inclusive"
     let reg_save = @@
@@ -80,9 +79,8 @@ function! acme#acme#RightMouse(type)
     let &selection = sel_save
 endfunction
 
-" MiddleMouse(text): emulate the middle mouse operation in acme {{{1
-" acme's manual calls this button 'mouse button 3'
-function! acme#acme#MiddleMouse(text) 
+" RightMouse(text): emulate the right mouse operation in acme {{{1
+function! acme#acme#RightMouse(text) 
     let text_data = split(a:text, ":")[:1]
     if len(text_data) > 1
 	if filereadable(text_data[0]) || text_data[0] == ''
