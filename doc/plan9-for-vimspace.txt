@@ -31,7 +31,7 @@ configuration variables for each module:
   Attempt to move the mouse on actions. (Not yet implemented)
 
 - *g:plan9#acme#map_keyboard*
-  Default = 0
+  Default = 1
 
   Provide keyboard mappings for the acme mouse actions.
 

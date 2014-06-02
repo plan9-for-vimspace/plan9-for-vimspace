@@ -13,7 +13,7 @@ function! acme#acme#Init()
 	let g:plan9#acme#move_mouse = 0
     endif
     if !exists("g:plan9#acme#map_keyboard")
-	let g:plan9#acme#map_keyboard = 0
+	let g:plan9#acme#map_keyboard = 1
     endif
 
     if g:plan9#acme#map_mouse > 0
