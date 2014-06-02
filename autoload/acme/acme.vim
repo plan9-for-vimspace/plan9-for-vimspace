@@ -81,12 +81,10 @@ endfunction
 
 " RightMouse(text): emulate the right mouse operation in acme {{{1
 function! acme#acme#RightMouse(text) 
-    let text_data = split(a:text, ":")[:1]
-    if len(text_data) > 1
-	if filereadable(text_data[0]) || text_data[0] == ''
-            call plan9#address#Do(a:text)
-	    return
-	endif
+    let text_data = split(a:text, ":")
+    if filereadable(text_data[0]) || (text_data[0] == '' && len(text_data) > 1)
+	call plan9#address#Do(a:text)
+	return
     endif
     exe "silent normal *"
 endfunction
