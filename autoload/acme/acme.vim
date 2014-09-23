@@ -32,6 +32,7 @@ function! acme#acme#Init()
 endfunction
 
 " MiddleMouse(text): emulate the middle mouse operation in acme {{{1
+" executes the command in the selection
 function! acme#acme#MiddleMouse(type)
     let sel_save = &selection
     let &selection = "inclusive"
@@ -80,6 +81,8 @@ function! acme#acme#MiddleMouse(type)
 endfunction
 
 " RightMouse(text): emulate the right mouse operation in acme {{{1
+" if text is a valid address, it moves to the location
+" if not, it searches the word under the cursor
 function! acme#acme#RightMouse(text)
     let text_data = split(a:text, ":")
     if len(text_data) > 0

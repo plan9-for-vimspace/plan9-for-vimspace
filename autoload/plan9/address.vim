@@ -6,21 +6,21 @@
 
 " s:SimpleAddress(address): compiles a simple address into viml {{{1
 function! s:SimpleAddress(address, idx)
-    " get our direction in the compound address {{{2
+    " get our direction in the compound address
     if a:address[0] == "-" 
 	let direction = "back"
     else
 	let direction = "forward"
-    endif "}}}2
-    " strip direction marks {{{2 
+    endif 
+    " strip direction marks  
     if a:address[0] =~ "[-+]"
 	let address = a:address[1:]
     else
 	let address = a:address
-    endif "}}}2
+    endif 
 
-    " compile addresses according to their type "{{{2
-    if address[0] == "#" " character position {{{3
+    " compile addresses according to their type 
+    if address[0] == "#" " character position
 	let instructions = []
 	if a:idx == 0
 	    call add(instructions, "normal gg")
@@ -39,12 +39,12 @@ function! s:SimpleAddress(address, idx)
 	    call extend(instructions, 
 			\['exe "go ". eval("line2byte(line(\".\")) - 1 + col(\".\") - '. a_char . '")' ])
 	endif
-	return instructions "}}}3
-    elseif address[0] == "0" " beggining of file {{{3
-	return ["normal gg"] "}}}3
-    elseif address[0] == "$" " end of file {{{3
-	return ["normal G$"] "}}}3
-    elseif address[0] == "/" " forwards search {{{3
+	return instructions 
+    elseif address[0] == "0" " beggining of file 
+	return ["normal gg"] 
+    elseif address[0] == "$" " end of file 
+	return ["normal G$"] 
+    elseif address[0] == "/" " forwards search 
 	let instructions = []
 	if a:idx == 0
 	    call add(instructions, "normal gg")
@@ -57,15 +57,15 @@ function! s:SimpleAddress(address, idx)
 	    " [1]: http://plan9.bell-labs.com/sys/doc/sam/sam.html
 	    call extend(instructions, ["call search('" . address[1:-2] . "', 'b')"])
 	endif 
-	return instructions " }}}3
-    elseif address[0] == "?" " backwards search {{{3
+	return instructions " 
+    elseif address[0] == "?" " backwards search 
 	let instructions = []
 	if a:idx == 0
 	    call add(instructions, "normal G$")
 	endif
 	call extend(instructions, ["call search('" . address[1:-2] . "', 'b')"])
-	return instructions "}}}3
-    endif " }}}2
+	return instructions 
+    endif 
 
     " if all else fails, we have a line number
     return [address]
@@ -77,7 +77,7 @@ function! plan9#address#Compile(address)
 
     let instructions = []
 
-    " the file the address references {{{2
+    " the file the address references 
     if filereadable(l:a_data[0])
 	let l:filename = l:a_data[0]
 	if !buffer_exists(l:filename)
@@ -85,10 +85,10 @@ function! plan9#address#Compile(address)
 	else
 	    call add(instructions, "buffer " . l:filename)
 	endif
-    endif "}}}2
+    endif 
 
     if len(l:a_data) > 1
-	" tokenize {{{2
+	" tokenize 
 	let l:addr_chars = split(l:a_data[1], '\zs')
 	let tokens = []
 	let c_token = ''
@@ -100,13 +100,13 @@ function! plan9#address#Compile(address)
 	    endif
 	    let c_token = c_token . i
 	endfor
-	call add(tokens, c_token) "complete the list with the remainder }}}2
+	call add(tokens, c_token) "complete the list with the remainder 
 
-	" compile tokens {{{2
+	" compile tokens 
 	for token in tokens
 	    let idx = index(tokens, token)
 	    call extend(instructions, s:SimpleAddress(token, idx))
-	endfor "}}}2
+	endfor 
     endif
 
     return instructions 
@@ -148,7 +148,9 @@ function! plan9#address#BuildFromSelection(mods)
     return join([path, "/".getreg("*")."/"], ":")
 endfunction 
 
-" Tests: {{{1    
+" Tests: {{{1 
+" must ':cd' into this folder for these to work
+"
 " address.vim:12
 " address.vim:#24
 " address.vim:35+#5
