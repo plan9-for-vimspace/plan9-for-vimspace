@@ -1,6 +1,9 @@
 function! address_handler#address_handler#Init()
+    if !exists("g:plan9#address_handler#full_plan9_address")
+        let g:plan9#address_handler#full_plan9_address = 0
+    endif
     if !exists("g:plan9#address_handler#gnu_col")
-        let g:plan9#address_handler#gnu_col = 0
+        let g:plan9#address_handler#gnu_col = 1
     endif
 
     au! BufReadCmd *:* call address_handler#address_handler#ReadCmd(expand("<amatch>"))
@@ -8,24 +11,39 @@ endfunction
 
 function! address_handler#address_handler#ReadCmd(match)
     let l:match_data = split(a:match, ":")
-    echom l:match_data
     let l:path = l:match_data[0]
-    let l:line = l:match_data[1]
-    let l:col = 1 "default
 
-    " GNU utils sometimes output addresses in the form FILE:LNUM:COL
-    " This supports that syntax.
-    if g:plan9#address_handler#gnu_col == 1
-        try
-            let l:col = l:match_data[2]
-        catch /E684/ 
-        endtry
-    endif
+    " we must pass the command the BufReadCmd triggered, to be consistent
+    let l:open_cmd = split(histget("cmd", -1), " ")[0]
 
     if filereadable(l:path)
         bw! "required so we don't pollute the bufferlist
-        exe "edit ".l:path
+        
+        if g:plan9#address_handler#full_plan9_address == 1
+            " defer all wor to our address compiler
+            call plan9#address#Do(a:match, l:open_cmd)
+        else
+            let l:line = l:match_data[1]
+            let l:col = 1 "default
+
+            " GNU utils sometimes output addresses in the form FILE:LNUM:COL
+            " This supports that syntax.
+            if g:plan9#address_handler#gnu_col == 1
+                try
+                    let l:col = l:match_data[2]
+                catch /E684/ 
+                endtry
+            endif
+            " this should take care of lnums and searches
+            " Note: ?...? works, but /.../ causes a vim error we can't catch
+            exe l:open_cmd." ".l:path 
+            exe l:line
+            " if we have a column number, we move the cursor
+            if l:col != 1
+                silent call cursor(l:line, l:col)
+            endif
+        endif
+
         filetype detect
-        silent call cursor(l:line, l:col)
     endif
 endfunction

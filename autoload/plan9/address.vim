@@ -72,7 +72,13 @@ function! s:SimpleAddress(address, idx)
 endfunction
 
 " Compile(address): compile a plan9 address into viml {{{1
-function! plan9#address#Compile(address)
+function! plan9#address#Compile(address, ...)
+    if a:0 > 0
+        let l:open_cmd = a:1
+    else 
+        let l:open_cmd = "botright split"
+    endif
+
     let l:a_data = split(a:address, ":", 1)
 
     let instructions = []
@@ -81,7 +87,7 @@ function! plan9#address#Compile(address)
     if filereadable(l:a_data[0])
 	let l:filename = l:a_data[0]
 	if !buffer_exists(l:filename)
-	    call add(instructions, "botright split " . l:filename)
+	    call add(instructions, l:open_cmd . " " . l:filename)
 	else
 	    call add(instructions, "buffer " . l:filename)
 	endif
@@ -113,8 +119,13 @@ function! plan9#address#Compile(address)
 endfunction
 
 " Do(address): Execute the viml compiled for an address {{{1
-function! plan9#address#Do(address)
-    for instruction in plan9#address#Compile(a:address)
+function! plan9#address#Do(address, ...)
+    if a:0 > 0
+        let l:open_cmd = a:1
+    else
+        let l:open_cmd = "botright split"
+    endif
+    for instruction in plan9#address#Compile(a:address, l:open_cmd)
 	exe instruction
     endfor
 endfunction
@@ -159,3 +170,4 @@ endfunction
 " address.vim:-/plan9/
 " address.vim:20-/function/
 " address.vim:20+?function?
+" ../acme/acme.vim
