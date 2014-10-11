@@ -4,7 +4,10 @@
 
 " Defaults: {{{1
 if !exists("g:plan9#modules#enabled")
-    let g:plan9#modules#enabled = ["acme"]
+    let g:plan9#modules#enabled = [
+                \"acme",
+                \"address_handler"
+                \]
 endif
 
 " Initialize: {{{1
