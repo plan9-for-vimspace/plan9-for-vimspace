@@ -10,9 +10,6 @@ function! address_handler#address_handler#ReadCmd(match)
         bw! "required so we don't pollute the bufferlist
         exe "edit ".l:path
         filetype detect
-        try
-            silent exe l:line
-        catch /E486/
-        endtry
+        silent exe l:line
     endif
 endfunction
