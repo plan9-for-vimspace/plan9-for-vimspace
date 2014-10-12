@@ -25,7 +25,19 @@ function! address_handler#address_handler#ReadCmd(match)
 
     " we must pass the command the BufReadCmd triggered, to be consistent
     let l:valid_open_cmd_regex = '\('.join(s:valid_cmds, '\|').'\)'
-    let l:open_cmd = matchstr(histget("cmd", -1), '\(\(\d*verbose\|silent!\?\)\s\)\?\(\(botright\|topleft\)\s\)\?\d*.*!\?\ze\s')
+    " TODO: improve this regex
+    let l:open_cmd = matchstr(histget("cmd", -1), 
+                \'\(\(\d*verbo\?s\?e\?\|sile\?n\?t\?!\?\)\s\)\?'.
+                \'\(\('.
+                    \'bot\?r\?i\?g\?h\?t\?\|'.
+                    \'top\?l\?e\?f\?t\?\|'.
+                    \'verti\?c\?a\?l\?\|'.
+                    \'letfab\?o\?v\?e\?\|'.
+                    \'abov\?e\?l\?e\?f\?t\?\|'.
+                    \'rightbe\?l\?o\?w\?\|'.
+                    \'belo\?w\?r\?i\?g\?h\?t\?'
+                \'\)\s\)\?'.
+                \'\d*.*!\?\ze\s')
     if match(l:open_cmd, l:valid_open_cmd_regex) == -1
         let l:open_cmd = "edit"
     endif
