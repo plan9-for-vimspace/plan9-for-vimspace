@@ -24,21 +24,22 @@ function! address_handler#address_handler#ReadCmd(match)
 
     " we must support addresses like `test:1:1`,
     " where `test:1` is a valid filename
-    let l:test_path = l:match_data[0]
+    let l:test_path = a:match
     let l:test_idx = 1
     while !filereadable(l:test_path)
         try
-            let l:test_path = join([l:test_path, l:match_data[l:test_idx]], ":")
-            let l:test_idx += 1
+            let l:test_path = join(l:match_data[:-l:test_idx], ":")
         catch /E684/ "we didn't find a valid filename
             " we will use the path given, 
             " since we can't go to an address anyway
             let l:test_path = a:match
             break
         endtry
+        let l:test_idx += 1
     endwhile
     let l:path = l:test_path
-    let l:address_spec_data = l:match_data[l:test_idx+0:]
+    let l:offset = len(l:match_data) - l:test_idx + 2 " '2' because both len(match_data) and l:test_idx have an offset of 1
+    let l:address_spec_data = l:match_data[l:offset+0:]
 
     " we must pass the command the BufReadCmd triggered, to be consistent
     let l:valid_open_cmd_regex = '\('.join(s:valid_cmds, '\|').'\)'
