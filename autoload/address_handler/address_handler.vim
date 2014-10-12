@@ -21,7 +21,24 @@ endfunction
 
 function! address_handler#address_handler#ReadCmd(match)
     let l:match_data = split(a:match, ":")
-    let l:path = l:match_data[0]
+
+    " we must support addresses like `test:1:1`,
+    " where `test:1` is a valid filename
+    let l:test_path = l:match_data[0]
+    let l:test_idx = 1
+    while !filereadable(l:test_path)
+        try
+            let l:test_path = join([l:test_path, l:match_data[l:test_idx]], ":")
+            let l:test_idx += 1
+        catch /E684/ "we didn't find a valid filename
+            " we will use the path given, 
+            " since we can't go to an address anyway
+            let l:test_path = a:match
+            break
+        endtry
+    endwhile
+    let l:path = l:test_path
+    let l:address_spec_data = l:match_data[l:test_idx+0:]
 
     " we must pass the command the BufReadCmd triggered, to be consistent
     let l:valid_open_cmd_regex = '\('.join(s:valid_cmds, '\|').'\)'
@@ -42,34 +59,38 @@ function! address_handler#address_handler#ReadCmd(match)
         let l:open_cmd = "edit"
     endif
 
-    if filereadable(l:path)
-        bw! "required so we don't pollute the bufferlist
-        
-        if g:plan9#address_handler#full_plan9_address == 1
-            " defer all wor to our address compiler
-            call plan9#address#Do(a:match, l:open_cmd)
+    "rename the buffer, so we don't clutter the bufferlist with extraneous
+    "stuff or go agains expectations re buffer numbers
+    exe "file ".l:path 
+
+    if g:plan9#address_handler#full_plan9_address == 1
+        " defer all work to our address compiler
+        call plan9#address#Do(a:match, l:open_cmd)
+    else
+        if len(address_spec_data) > 0
+            let l:line = l:address_spec_data[0]
         else
-            let l:line = l:match_data[1]
-            let l:col = 1 "default
-
-            " GNU utils sometimes output addresses in the form FILE:LNUM:COL
-            " This supports that syntax.
-            if g:plan9#address_handler#gnu_col == 1
-                try
-                    let l:col = l:match_data[2]
-                catch /E684/ 
-                endtry
-            endif
-            " this should take care of lnums and searches
-            " Note: ?...? works, but /.../ causes a vim error we can't catch
-            exe l:open_cmd." ".l:path 
-            exe l:line
-            " if we have a column number, we move the cursor
-            if l:col != 1
-                silent call cursor(l:line, l:col)
-            endif
+            let l:line = 1 "default
         endif
+        let l:col = 1 "default
 
-        filetype detect
+        " GNU utils sometimes output addresses in the form FILE:LNUM:COL
+        " This supports that syntax.
+        if g:plan9#address_handler#gnu_col == 1
+            try
+                let l:col = l:address_spec_data[1]
+            catch /E684/ 
+            endtry
+        endif
+        " this should take care of lnums and searches
+        " Note: ?...? works, but /.../ causes a vim error we can't catch
+        exe l:open_cmd." ".l:path 
+        exe l:line
+        " if we have a column number, we move the cursor
+        if l:col != 1
+            silent call cursor(l:line, l:col)
+        endif
     endif
+
+    filetype detect
 endfunction
