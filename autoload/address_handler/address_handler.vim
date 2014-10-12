@@ -1,3 +1,13 @@
+let s:valid_cmds = [
+            \"edit",
+            \"visual",
+            \"split",
+            \"vsplit",
+            \"new",
+            \"view",
+            \"sview",
+            \]
+
 function! address_handler#address_handler#Init()
     if !exists("g:plan9#address_handler#full_plan9_address")
         let g:plan9#address_handler#full_plan9_address = 0
@@ -14,7 +24,11 @@ function! address_handler#address_handler#ReadCmd(match)
     let l:path = l:match_data[0]
 
     " we must pass the command the BufReadCmd triggered, to be consistent
-    let l:open_cmd = split(histget("cmd", -1), " ")[0]
+    let l:valid_open_cmd_regex = '\('.join(s:valid_cmds, '\|').'\)'
+    let l:open_cmd = matchstr(histget("cmd", -1), '\(\(\d*verbose\|silent!\?\)\s\)\?\(\(botright\|topleft\)\s\)\?\d*.*!\?\ze\s')
+    if match(l:open_cmd, l:valid_open_cmd_regex) == -1
+        let l:open_cmd = "edit"
+    endif
 
     if filereadable(l:path)
         bw! "required so we don't pollute the bufferlist
