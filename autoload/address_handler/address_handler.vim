@@ -31,7 +31,7 @@ function! address_handler#address_handler#ReadCmd(match)
             let l:test_path = join([l:test_path, l:match_data[l:test_idx]], ":")
             let l:test_idx += 1
         catch /E684/ "we didn't find a valid filename
-            " we will use the path given, 
+            " we will use the path given,
             " since we can't go to an address anyway
             let l:test_path = a:match
             break
@@ -43,7 +43,7 @@ function! address_handler#address_handler#ReadCmd(match)
     " we must pass the command the BufReadCmd triggered, to be consistent
     let l:valid_open_cmd_regex = '\('.join(s:valid_cmds, '\|').'\)'
     " TODO: improve this regex
-    let l:open_cmd = matchstr(histget("cmd", -1), 
+    let l:open_cmd = matchstr(histget("cmd", -1),
                 \'\(\(\d*verbo\?s\?e\?\|sile\?n\?t\?!\?\)\s\)\?'.
                 \'\(\('.
                     \'bot\?r\?i\?g\?h\?t\?\|'.
@@ -61,7 +61,7 @@ function! address_handler#address_handler#ReadCmd(match)
 
     "rename the buffer, so we don't clutter the bufferlist with extraneous
     "stuff or go agains expectations re buffer numbers
-    exe "file ".l:path 
+    silent exe "file ".l:path
 
     if g:plan9#address_handler#full_plan9_address == 1
         " defer all work to our address compiler
@@ -79,13 +79,13 @@ function! address_handler#address_handler#ReadCmd(match)
         if g:plan9#address_handler#gnu_col == 1
             try
                 let l:col = l:address_spec_data[1]
-            catch /E684/ 
+            catch /E684/
             endtry
         endif
         " this should take care of lnums and searches
         " Note: ?...? works, but /.../ causes a vim error we can't catch
-        exe l:open_cmd." ".l:path 
-        exe l:line
+        silent exe l:open_cmd." ".l:path
+        silent exe l:line
         " if we have a column number, we move the cursor
         if l:col != 1
             silent call cursor(l:line, l:col)
