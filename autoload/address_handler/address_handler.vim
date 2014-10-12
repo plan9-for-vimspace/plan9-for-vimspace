@@ -1,12 +1,13 @@
-let s:valid_cmds = [
-            \"edit",
-            \"visual",
-            \"split",
-            \"vsplit",
-            \"new",
-            \"view",
-            \"sview",
-            \]
+let s:valid_cmds_regex = '('.
+            \"<\d*e(>|d|di|dit)@=|".
+            \"<\d*vi(>|s|su|sua|sual)@=|".
+            \"<\d*sp(>|l|li|lit)@=|".
+            \"<\d*vs(>|p|pl|pli|plit)@=|".
+            \"<\d*new|".
+            \"<\d*vne(>|w)@=|".
+            \"<\d*vie(>|w)@=|".
+            \"<\d*sv(>|i|ie|iew)@=".
+            \")"
 
 function! address_handler#address_handler#Init()
     if !exists("g:plan9#address_handler#full_plan9_address")
@@ -42,27 +43,21 @@ function! address_handler#address_handler#ReadCmd(match)
     let l:address_spec_data = l:match_data[l:offset+0:]
 
     " we must pass the command the BufReadCmd triggered, to be consistent
-    let l:valid_open_cmd_regex = '\('.join(s:valid_cmds, '\|').'\)'
-    " TODO: improve this regex
     let l:open_cmd = matchstr(histget("cmd", -1),
-                \'\(\(\d*verbo\?s\?e\?\|sile\?n\?t\?!\?\)\s\)\?'.
-                \'\(\('.
-                    \'bot\?r\?i\?g\?h\?t\?\|'.
-                    \'top\?l\?e\?f\?t\?\|'.
-                    \'verti\?c\?a\?l\?\|'.
-                    \'letfab\?o\?v\?e\?\|'.
-                    \'abov\?e\?l\?e\?f\?t\?\|'.
-                    \'rightbe\?l\?o\?w\?\|'.
-                    \'belo\?w\?r\?i\?g\?h\?t\?'
-                \'\)\s\)\?'.
-                \'\d*.*!\?\ze\s')
-    if match(l:open_cmd, l:valid_open_cmd_regex) == -1
+                \'\v.*'.s:valid_cmds_regex )
+    if l:open_cmd == ''
         let l:open_cmd = "edit"
     endif
 
     "rename the buffer, so we don't clutter the bufferlist with extraneous
     "stuff or go agains expectations re buffer numbers
-    silent exe "file ".l:path
+    if expand('%r') != ''
+        if l:open_cmd =~ "\ve(>|d|di|dit)@="
+            silent exe "file ".l:path
+        else
+            bw! 
+        endif
+    endif
 
     if g:plan9#address_handler#full_plan9_address == 1
         " defer all work to our address compiler
