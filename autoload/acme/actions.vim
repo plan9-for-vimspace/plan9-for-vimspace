@@ -87,14 +87,14 @@ function! acme#actions#RightMouse(text)
     if len(text_data) > 0
         if filereadable(text_data[0]) || (text_data[0] == '' && len(text_data) > 1)
             call plan9#address#Do(a:text)
-            if g:plan9#acme#open_folds == 1
-                try
-                    normal! zo
-                catch /E490/
-                endtry
-            endif
-            return
+        else
+            exe "silent normal *"
         endif
-        exe "silent normal *"
+        if g:plan9#acme#open_folds == 1
+            try
+                normal! zo
+            catch /E490/
+            endtry
+        endif
     endif
 endfunction
