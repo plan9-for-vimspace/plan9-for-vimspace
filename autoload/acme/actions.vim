@@ -12,6 +12,9 @@ function! acme#actions#Init()
     if !exists("g:plan9#acme#map_keyboard")
 	let g:plan9#acme#map_keyboard = 1
     endif
+    if !exists("g:plan9#acme#open_folds")
+        let g:plan9#acme#open_folds = 1
+    endif
     if g:plan9#acme#map_mouse > 0
 	nnoremap <silent> <RightMouse> <LeftMouse>:call acme#actions#RightMouse(expand('<cWORD>'))<cr>
 	vnoremap <silent> <RightMouse> :call acme#actions#RightMouse(getreg("*"))<cr>
@@ -84,6 +87,12 @@ function! acme#actions#RightMouse(text)
     if len(text_data) > 0
         if filereadable(text_data[0]) || (text_data[0] == '' && len(text_data) > 1)
             call plan9#address#Do(a:text)
+            if g:plan9#acme#open_folds == 1
+                try
+                    normal! zo
+                catch /E490/
+                endtry
+            endif
             return
         endif
         exe "silent normal *"
