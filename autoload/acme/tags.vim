@@ -2,39 +2,51 @@
 
 " support sets of executable commands (tags)
 "
-" the basic idea is to use omnifunc to create a popup menu of sorts that lists executable
-" tags. this list is populated from both global and buffer-local variable
-" sources. 
-" currently, this approach won't work because we can't notify what was the
-" last completion and extra info on CompleteDone. 
-" another approach would be to use the commandline for this, or a nofile
-" buffer.
 
 function! acme#tags#Init()
     if !exists("g:plan9#acme#tags")
-        let g:plan9#acme#tags = []
+        let g:plan9#acme#tags = ["Cut", "Paste", "Edit", "Look", "Snarf", "Undo"]
+    endif
+    runtime syntax/plan9-acme-ui.vim
+    noremap <silent> <leader>9t :call acme#tags#ShowTags()<cr>
+endfunction
+
+function! s:GatherTags()
+    if exists('g:plan9#acme#tags')
+        if exists('b:plan9_acme_tags')
+            return extend(g:plan9#acme#tags, b:plan9_acme_tags)
+        else
+            return g:plan9#acme#tags
+        endif
+    else
+        if exists('b:plan9_acme_tags')
+            return b:plan9_acme_tags
+        else
+            return []
+        endif
     endif
 endfunction
 
-function! acme#tags#ShowTags(findstart, base)
-    if a:findstart == 1
-        return col('.')
-    else
-        let l:complete_list_dict = []
-        if exists('b:plan9_acme_tags')
-            let l:tags = extend(g:plan9#acme#tags, b:acme_tags)
-        else
-            let l:tags = g:plan9#acme#tags
-        endif
-        for tag in l:tags 
-            call add(l:complete_list_dict, {'word': '', 'abbr': tag, 'empty': 1, 'dup': 1})
-        endfor
-        return {'words': l:complete_list_dict}
+function! s:Reset()
+    let s:orig_buf = 0
+endfunction
+
+function! acme#tags#ShowTags()
+    if bufnr('^acme/tags$') == -1
+        let s:orig_buf = bufnr('%')
+        silent 1new acme/tags
+        call append(0, join(s:GatherTags(), " ").repeat(" ", &columns))
+        " delete last line (it is unused anyway)
+        normal dd 
+        set ft=plan9-acme-tags "initialize buffer config from ftplugin/plan9-acme-tags.vim 
     endif
 endfunction
 
 function! acme#tags#AddTag(tag, local)
     if a:local == 1
+        if !exists("b:plan9_acme_tags")
+            let b:plan9_acme_tags = []
+        endif
         call add(b:plan9_acme_tags, a:tag)
     else
         call add(g:plan9#acme#tags, a:tag)
