@@ -1,3 +1,4 @@
+" Note: Is there a better way to do this?
 let s:valid_cmds_regex = '('.
             \"<\d*e(>|d|di|dit)@=|".
             \"<\d*vi(>|s|su|sua|sual)@=|".
@@ -16,8 +17,7 @@ function! address_handler#address_handler#Init()
     if !exists("g:plan9#address_handler#gnu_col")
         let g:plan9#address_handler#gnu_col = 1
     endif
-
-    au! BufReadCmd *:* call address_handler#address_handler#ReadCmd(expand("<amatch>"))
+    au! BufReadCmd *:* call address_handler#address_handler#ReadCmd(fnameescape(expand("<amatch>")))
 endfunction
 
 function! address_handler#address_handler#ReadCmd(match)
