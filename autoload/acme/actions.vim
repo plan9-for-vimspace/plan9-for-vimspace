@@ -23,10 +23,10 @@ function! acme#actions#Init()
     endif
 
     if g:plan9#acme#map_keyboard > 0
-	nnoremap <silent> <leader>mr :call acme#actions#RightMouse(expand('<cWORD>'))<cr>
-	vnoremap <silent> <leader>mr :call acme#actions#RightMouse(getreg("*"))<cr>
-	nnoremap <silent> <leader>mm :set opfunc=acme#actions#MiddleMouse<cr>g@
-	vnoremap <silent> <leader>mm :<C-U>call acme#actions#MiddleMouse(visualmode())<cr>
+	nnoremap <silent> <leader>90 :call acme#actions#RightMouse(expand('<cWORD>'))<cr>
+	vnoremap <silent> <leader>90 :call acme#actions#RightMouse(getreg("*"))<cr>
+	nnoremap <silent> <leader>99 :set opfunc=acme#actions#MiddleMouse<cr>g@
+	vnoremap <silent> <leader>99 :<C-U>call acme#actions#MiddleMouse(visualmode())<cr>
     endif
 endfunction
 
