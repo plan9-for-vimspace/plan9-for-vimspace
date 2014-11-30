@@ -4,15 +4,17 @@
                             PLAN 9 FOR VIMSPACE      
 
 plan9-for-vimspace provides plan9 inspired utilities for vim. Currently, it
-only provides acme emulation, but a plumbing system and support for the editing
-language in sam are planned.
+only provides acme emulation and support for acme addresses in |:edit| and
+related commands, but a plumbing system and support for the editing language in
+sam are planned.
 
-- CONFIGURATION                               *plan9-for-vimspace-configutation*
+- CONFIGURATION                               *plan9-for-vimspace-configuration*
 
 					  	       *g:plan9#modules#enabled*
 
 The plugin is composed of modules. What modules are enabled depends on the
-value of `g:plan9#modules#enabled`. By default, only the "acme" module is.
+value of `g:plan9#modules#enabled`. By default, "acme" and "address_handler"
+modules are enabled.
 
 On initialization, each module configures itself (unused configuration
 variables are simply not created). The following is a list of available
@@ -34,5 +36,3 @@ configuration variables for each module:
   Default = 1
 
   Provide keyboard mappings for the acme mouse actions.
-
-
