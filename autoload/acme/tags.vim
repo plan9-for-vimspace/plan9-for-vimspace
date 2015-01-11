@@ -27,21 +27,6 @@ function! s:GatherTags()
     endif
 endfunction
 
-function! s:Reset()
-    let s:orig_buf = 0
-endfunction
-
-function! acme#tags#ShowTags()
-    if bufnr('^acme/tags$') == -1
-        let s:orig_buf = bufnr('%')
-        silent 1new acme/tags
-        call append(0, join(s:GatherTags(), " ").repeat(" ", &columns))
-        " delete last line (it is unused anyway)
-        normal dd 
-        set ft=plan9-acme-tags "initialize buffer config from ftplugin/plan9-acme-tags.vim 
-    endif
-endfunction
-
 function! acme#tags#AddTag(tag, local)
     if a:local == 1
         if !exists("b:plan9_acme_tags")
@@ -60,3 +45,24 @@ function! acme#tags#RemoveTag(tag, local)
         call remove(g:plan9#acme#tags, index(g:plan9#acme#tags, a:tag))
     endif
 endfunction
+
+function! s:Reset()
+    let s:orig_buf = 0
+endfunction
+
+function! acme#tags#ShowTags()
+    if bufnr('^acme/tags$') == -1
+        let s:orig_buf = bufnr('%')
+        silent 1new acme/tags
+        call append(0, join(s:GatherTags(), " ").repeat(" ", &columns))
+        " delete last line (it is unused anyway)
+        normal dd 
+        set ft=plan9-acme-tags "initialize buffer config from ftplugin/plan9-acme-tags.vim 
+    endif
+endfunction
+
+function! acme#tags#ApplyTag(tag)
+    echom a:tag
+endfunction
+
+
