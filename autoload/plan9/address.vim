@@ -33,8 +33,12 @@ function! s:SimpleAddress(address, idx)
 	    " calculate the current byte to add to a_char.
 	    " the `line2byte(...` part is wrapped in eval because :go doesn't
 	    " allow functions in the arguments.
-	    call extend(instructions, 
+            if a:idx == 0
+                call extend(instructions, [a_char.'go'])
+            else
+	        call extend(instructions, 
 			\['exe "go ". eval("line2byte(line(\".\")) - 1 + col(\".\") - 1 + '. a_char . '")' ])
+            endif
 	elseif direction == "back"
 	    call extend(instructions, 
 			\['exe "go ". eval("line2byte(line(\".\")) - 1 + col(\".\") - '. a_char . '")' ])
@@ -100,13 +104,12 @@ function! plan9#address#Compile(address, ...)
 	let c_token = ''
 	for i in l:addr_chars
 	    if i =~ '[+-]'
-		call add(tokens, c_token)
-		" call add(tokens, i)
+		call add(tokens, substitute(c_token, '\\#\@=', '', ''))
 		let c_token = ''
 	    endif
 	    let c_token = c_token . i
 	endfor
-	call add(tokens, c_token) "complete the list with the remainder 
+	call add(tokens, substitute(c_token, '\\#\@=', '', '')) "complete the list with the remainder 
 
 	" compile tokens 
 	for token in tokens
@@ -163,11 +166,12 @@ endfunction
 " must ':cd' into this folder for these to work
 "
 " address.vim:12
-" address.vim:#24
+" address.vim:#12
 " address.vim:35+#5
 " address.vim:/function/
 " address.vim:?plan9?
 " address.vim:-/plan9/
 " address.vim:20-/function/
+" address.vim:73+/^function/
 " address.vim:20+?function?
 " ../acme/acme.vim

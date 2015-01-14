@@ -43,8 +43,7 @@ function! address_handler#address_handler#ReadCmd(match)
     let l:address_spec_data = l:match_data[l:offset+0:]
 
     " we must pass the command the BufReadCmd triggered, to be consistent
-    let l:open_cmd = matchstr(histget("cmd", -1),
-                \'\v.*'.s:valid_cmds_regex )
+    let l:open_cmd = matchstr(histget("cmd", -1), '\v.*'.s:valid_cmds_regex )
     if l:open_cmd == ''
         let l:open_cmd = "edit"
     endif
@@ -63,12 +62,15 @@ function! address_handler#address_handler#ReadCmd(match)
         " defer all work to our address compiler
         call plan9#address#Do(a:match, l:open_cmd)
     else
+        let l:line = 1
+        let l:col = 1
         if len(address_spec_data) > 0
-            let l:line = l:address_spec_data[0]
-        else
-            let l:line = 1 "default
+            if l:address_spec_data[0] !~ '^\\\#'
+                let l:line = l:address_spec_data[0]
+            else
+                let l:byte = substitute(l:address_spec_data[0], '\\\#', '', '')
+            endif
         endif
-        let l:col = 1 "default
 
         " GNU utils sometimes output addresses in the form FILE:LNUM:COL
         " This supports that syntax.
@@ -81,10 +83,13 @@ function! address_handler#address_handler#ReadCmd(match)
         " this should take care of lnums and searches
         " Note: ?...? works, but /.../ causes a vim error we can't catch
         silent exe l:open_cmd." ".l:path
-        silent exe l:line
-        " if we have a column number, we move the cursor
-        if l:col != 1
+        silent call cursor(1,1)
+        if !exists('l:byte')
             silent call cursor(l:line, l:col)
+        else
+            let l:line = byte2line(l:byte)
+            let l:col = l:byte-line2byte(line)+1
+            silent call cursor(line, col)
         endif
     endif
 
