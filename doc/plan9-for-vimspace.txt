@@ -25,7 +25,10 @@ configuration variables for each module:
 - *g:plan9#acme#map_mouse*
   Default = 1
 
-  Remap the mouse buttons as in the acme editor.
+  Remap the mouse buttons as in the acme editor:
+	- <MiddleMouse> executes the selection.
+	- <RightMouse> moves to the location defined by the address under
+	   the cursor, or searches for the word under the cursor.
 
 - *g:plan9#acme#move_mouse*
   Default = 0
