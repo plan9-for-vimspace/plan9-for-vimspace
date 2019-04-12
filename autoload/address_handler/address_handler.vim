@@ -54,7 +54,7 @@ function! address_handler#address_handler#ReadCmd(match)
         if l:open_cmd =~ "\ve(>|d|di|dit)@="
             silent exe "file ".l:path
         else
-            bw! 
+            bw!
         endif
     endif
 
@@ -93,5 +93,6 @@ function! address_handler#address_handler#ReadCmd(match)
         endif
     endif
 
+    execute "doautocmd BufRead *.".fnamemodify(l:path, ":e")
     filetype detect
 endfunction
